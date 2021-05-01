@@ -31,16 +31,16 @@ private:
         N = 0, NE, E, SE, S, SW, W, NW
     };
 
-    
-
 public:
     Cell() {};
     Cell(int x, int y);
 
+    // prints basic informations about the cell
     void Print() {
         std::cout << m_x << ", " << m_y << " | Alive: " << m_alive << " | Alive next Epoch: " << m_alive_next_epoch << std::endl;
     }
 
+    // sets the surrounding cells as attributes
     void setSurroundingCells(Cell* n, Cell* ne, Cell* e, Cell* se, Cell* s, Cell* sw, Cell* w, Cell* nw) { // requiers pointers
         std::cout << n << std::endl;
         m_surrounding_cells.push_back(n);
@@ -53,6 +53,7 @@ public:
         m_surrounding_cells.push_back(nw);
     }
 
+    // counts how many alive neighbours the cell has
     int howManyAliveNeighbours() {
         int alive_neighbours = 0;
         for (std::vector<Cell*>::iterator pObj = m_surrounding_cells.begin(); pObj != m_surrounding_cells.end(); ++pObj) {
@@ -62,15 +63,14 @@ public:
 
             if (neighbour_alive) {
                 alive_neighbours += 1;
-
             }
 
         }
         return alive_neighbours;
     }
 
+    // calculates, based on the number of alive neighbours, if the cell will be alive next epoch
     void calculateNextEpoch() {
-        // How many alive neighbours
         int alive_neighbours = howManyAliveNeighbours();
         std::cout << alive_neighbours << std::endl;
 
@@ -108,6 +108,7 @@ private:
 public:
     bool OnUserCreate() override
     {
+        // initialization of important variables
         width = ScreenWidth();
         height = ScreenHeight();
         length = width * height;
@@ -115,10 +116,10 @@ public:
         srand(time(0));
 
         std::vector<Cell> grid(length);
-
         //memset(grid, 0, length * sizeof(Cell));
 
 
+        // filling the grid with cell-objects
         for (int i = 0; i < length; i++) {
             int x = (int)i % width;
             int y = (int)floor(i / width);
@@ -127,16 +128,18 @@ public:
             grid.push_back(Cell(x, y));
         }
 
+        // initializing border cell - the alive-status of this cell will never be calculated
         Cell border = Cell(-1, -1);
         border.m_alive = false;
         border.m_alive_next_epoch = false;
 
         // (y * w + x) index a 2d array in 1d
+
+        // set surrounding cells per cell | if next to an edge -> border-cell
         for (int i = 0; i < length; i++) {
             int x = grid[i].m_x;
             int y = grid[i].m_y;
 
-            // set surrounding cells
             Cell* n = (y == 0) ? &border : &grid[(y - 1) * width + (x + 0)];
             Cell* ne = (y == 0 || x == (width - 1)) ? &border : &grid[(y - 1) * width + (x + 1)];
             Cell* e = (x == (width - 1)) ? &border : &grid[(y + 0) * width + (x + 1)];
@@ -148,7 +151,7 @@ public:
 
             grid[i].setSurroundingCells(n, ne, e, se, s, sw, w, nw);
 
-            // set random alive or not alive
+            // sets random alive-status
             grid[i].m_alive = (bool)(rand() % 2 == 0);
 
 
@@ -161,19 +164,20 @@ public:
     bool OnUserUpdate(float fElapsedTime) override
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
-
+        
+        // calculate the alive-status of each cell for the next epoch
         for (int i = 0; i < length; i++) {
             grid[i].calculateNextEpoch();
-            
         }
         std::cout << "\n\n";
         
 
-
+        // If the current cell is alive, color the pixel black, else white
         for (int i = 0; i < length; i++) {
             Draw(grid[i].m_x, grid[i].m_y, (grid[i].m_alive) ? olc::BLACK : olc::WHITE);;
         }
 
+        // moves the calculation result of the next epoch into the variable alive
         for (int i = 0; i < length; i++) {
             grid[i].m_alive = grid[i].m_alive_next_epoch;
         }
