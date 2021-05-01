@@ -23,7 +23,7 @@ public:
     bool m_alive, m_alive_next_epoch;
 
     // m_n, m_ne, m_e, m_se, m_s, m_sw, m_w, m_nw
-    std::vector<Cell*> m_surrounding_cells;
+    Cell *m_surrounding_cells;
 
 private:
     enum Direction
@@ -41,30 +41,29 @@ public:
     }
 
     // sets the surrounding cells as attributes
-    void setSurroundingCells(Cell* n, Cell* ne, Cell* e, Cell* se, Cell* s, Cell* sw, Cell* w, Cell* nw) { // requiers pointers
-        std::cout << n << std::endl;
-        m_surrounding_cells.push_back(n);
-        m_surrounding_cells.push_back(ne);
-        m_surrounding_cells.push_back(e);
-        m_surrounding_cells.push_back(se);
-        m_surrounding_cells.push_back(s);
-        m_surrounding_cells.push_back(sw);
-        m_surrounding_cells.push_back(w);
-        m_surrounding_cells.push_back(nw);
+    void setSurroundingCells(Cell *n, Cell *ne, Cell *e, Cell *se, Cell *s, Cell *sw, Cell *w, Cell *nw) {
+        //std::cout << n << std::endl;
+        m_surrounding_cells[N] = n;
+        m_surrounding_cells[NE] = ne;
+        m_surrounding_cells[E] = e;
+        m_surrounding_cells[SE] = se;
+        m_surrounding_cells[S] = s;
+        m_surrounding_cells[SW] = sw;
+        m_surrounding_cells[W] = w;
+        m_surrounding_cells[NW] = nw;
     }
 
     // counts how many alive neighbours the cell has
     int howManyAliveNeighbours() {
         int alive_neighbours = 0;
-        for (std::vector<Cell*>::iterator pObj = m_surrounding_cells.begin(); pObj != m_surrounding_cells.end(); ++pObj) {
-            //Cell* neighbour = m_surrounding_cells[i];
-            bool neighbour_alive = (*pObj)->m_alive;
-            //std::cout << neighbour->m_x << ", " << neighbour->m_y << " | " << neighbour_alive << std::endl;
+        for (int i = 0; i < 8; i++) {
+            Cell neighbour = m_surrounding_cells[i];
+            bool neighbour_alive = neighbour->m_alive;
+            std::cout << neighbour->m_x << ", " << neighbour->m_y << " | " << neighbour_alive << std::endl;
 
             if (neighbour_alive) {
                 alive_neighbours += 1;
             }
-
         }
         return alive_neighbours;
     }
@@ -85,7 +84,8 @@ Cell::Cell(int x, int y) : m_x(x), m_y(y)
 {
     m_alive = false;
     m_alive_next_epoch = false;
-    m_surrounding_cells = std::vector<Cell*> ;
+    //m_surrounding_cells = new Cell[8];
+    *m_surrounding_cells[8]{};
 }
 
 // -----------------------------------------------------------------------
@@ -115,7 +115,7 @@ public:
         
         srand(time(0));
 
-        std::vector<Cell> grid(length);
+        Cell *grid = new Cell[length];
         //memset(grid, 0, length * sizeof(Cell));
 
 
@@ -125,7 +125,7 @@ public:
             int y = (int)floor(i / width);
 
             //std::cout << x << ", " << y << std::endl;
-            grid.push_back(Cell(x, y));
+            grid[i] = Cell(x, y);
         }
 
         // initializing border cell - the alive-status of this cell will never be calculated
