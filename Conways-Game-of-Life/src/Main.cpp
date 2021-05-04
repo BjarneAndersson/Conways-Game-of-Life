@@ -23,7 +23,7 @@ public:
     bool m_alive, m_alive_next_epoch;
 
     // m_n, m_ne, m_e, m_se, m_s, m_sw, m_w, m_nw
-    Cell *m_surrounding_cells;
+    Cell* m_surrounding_cells[8];
 
 private:
     enum Direction
@@ -41,7 +41,7 @@ public:
     }
 
     // sets the surrounding cells as attributes
-    void setSurroundingCells(Cell *n, Cell *ne, Cell *e, Cell *se, Cell *s, Cell *sw, Cell *w, Cell *nw) {
+    /*void setSurroundingCells(Cell *n, Cell *ne, Cell *e, Cell *se, Cell *s, Cell *sw, Cell *w, Cell *nw) {
         //std::cout << n << std::endl;
         m_surrounding_cells[N] = n;
         m_surrounding_cells[NE] = ne;
@@ -51,13 +51,17 @@ public:
         m_surrounding_cells[SW] = sw;
         m_surrounding_cells[W] = w;
         m_surrounding_cells[NW] = nw;
+    }*/
+
+    void setSurroundingCellsArr(Cell* surrounding_cells[]) {
+        m_surrounding_cells = surrounding_cells;
     }
 
     // counts how many alive neighbours the cell has
     int howManyAliveNeighbours() {
         int alive_neighbours = 0;
         for (int i = 0; i < 8; i++) {
-            Cell neighbour = m_surrounding_cells[i];
+            Cell *neighbour = m_surrounding_cells[i];
             bool neighbour_alive = neighbour->m_alive;
             std::cout << neighbour->m_x << ", " << neighbour->m_y << " | " << neighbour_alive << std::endl;
 
@@ -85,7 +89,7 @@ Cell::Cell(int x, int y) : m_x(x), m_y(y)
     m_alive = false;
     m_alive_next_epoch = false;
     //m_surrounding_cells = new Cell[8];
-    *m_surrounding_cells[8]{};
+    //Cell *m_surrounding_cells[8];
 }
 
 // -----------------------------------------------------------------------
@@ -149,7 +153,10 @@ public:
             Cell* w = (x == 0) ? &border : &grid[(y + 0) * width + (x - 1)];
             Cell* nw = (x == 0 || y == 0) ? &border : &grid[(y - 1) * width + (x - 1)];
 
-            grid[i].setSurroundingCells(n, ne, e, se, s, sw, w, nw);
+            Cell* surrounding_cells[8]{n, ne, e, se, s, sw, w, nw};
+
+            //grid[i].setSurroundingCells(n, ne, e, se, s, sw, w, nw);
+            grid[i].setSurroundingCellsArr(surrounding_cells);
 
             // sets random alive-status
             grid[i].m_alive = (bool)(rand() % 2 == 0);
